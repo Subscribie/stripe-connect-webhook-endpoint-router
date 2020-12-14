@@ -24,6 +24,8 @@ flask run
 
 ## Deploy
 
+See apache example config & wsgi config example in repo. (assumes mod wsgi is installed & enabled on apache)
+
 ## Debug
 
 Listen for webhooks using stripe cli (forwarding to *this* app)
