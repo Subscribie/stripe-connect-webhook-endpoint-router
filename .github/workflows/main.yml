@@ -49,7 +49,7 @@ jobs:
           ssh dokku@$DOKKU_HOST -C "dokku apps:create testing-stripe-connect-webhook-endpoint-router" | true
           echo The url will be testing-stripe-connect-webhook-endpoint-router.pcpink.co.uk
           ssh dokku@$DOKKU_HOST -C "dokku git:initialize testing-stripe-connect-webhook-endpoint-router"
-          ssh dokku@$DOKKU_HOST -C "dokku config:set --no-restart testing-stripe-connect-account-receiver REDIS_HOSTNAME=${{ secrets.REDIS_HOSTNAME }}
+          ssh dokku@$DOKKU_HOST -C "dokku config:set --no-restart testing-stripe-connect-account-receiver REDIS_HOSTNAME=${{ secrets.REDIS_HOSTNAME }}"
           ssh dokku@$DOKKU_HOST -C "dokku config:set --no-restart testing-stripe-connect-account-receiver REDIS_PORT=${{ secrets.REDIS_PORT }}"
           ssh dokku@$DOKKU_HOST -C "dokku config:set --no-restart testing-stripe-connect-account-receiver REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}"
           ssh dokku@$DOKKU_HOST -C "dokku config:set --no-restart testing-stripe-connect-account-receiver STRIPE_WEBHOOK_SECRET=${{ secrets.STRIPE_WEBHOOK_SECRET }}"
