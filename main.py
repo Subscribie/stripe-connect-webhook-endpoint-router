@@ -8,8 +8,9 @@ import logging
 
 load_dotenv(verbose=True)
 
-REDIS_HOST = os.environ.get("REDIS_HOST")
+REDIS_HOSTNAME = os.environ.get("REDIS_HOSTNAME")
 REDIS_PORT = os.environ.get("REDIS_PORT")
+REDIS_PASSWORD = os.environ.get("REDIS_PASSWORD")
 STRIPE_WEBHOOK_SECRET = os.environ.get("STRIPE_WEBHOOK_SECRET")
 STRIPE_WEBHOOK_PATH = os.environ.get("STRIPE_WEBHOOK_PATH")
 
@@ -27,7 +28,9 @@ def route_stripe_connect_webhook():
     """
 
     load_dotenv(verbose=True)
-    redisConn = redis.Redis(host=REDIS_HOST, port=REDIS_PORT)
+    redisConn = redis.Redis(
+        host=REDIS_HOSTNAME, port=REDIS_PORT, password=REDIS_PASSWORD
+    )
     try:
         stripe_connect_account_id = request.json["account"]
         # Get shop url from redis via stripe connect account id
@@ -69,6 +72,9 @@ def route_stripe_connect_webhook():
                   {stripe_connect_account_id}",
                 422,
             )
+    except redis.exceptions.ResponseError as e:
+        logging.error("Redis error")
+        logging.error(e)
     except Exception as e:
         logging.error("Error processing stripe webhook request")
         logging.error(e)
