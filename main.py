@@ -8,11 +8,17 @@ import logging
 
 load_dotenv(verbose=True)
 
+PYTHON_LOG_LEVEL = os.environ.get("PYTHON_LOG_LEVEL", "WARNING")
+
 REDIS_HOSTNAME = os.environ.get("REDIS_HOSTNAME")
 REDIS_PORT = os.environ.get("REDIS_PORT")
 REDIS_PASSWORD = os.environ.get("REDIS_PASSWORD")
 STRIPE_WEBHOOK_SECRET = os.environ.get("STRIPE_WEBHOOK_SECRET")
 STRIPE_WEBHOOK_PATH = os.environ.get("STRIPE_WEBHOOK_PATH")
+
+print(f"PYTHON_LOG_LEVEL is: {PYTHON_LOG_LEVEL}")
+
+logging.basicConfig(level=PYTHON_LOG_LEVEL)
 
 app = Flask(__name__)
 
