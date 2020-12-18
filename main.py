@@ -57,9 +57,13 @@ def route_stripe_connect_webhook():
                 logging.error(e)
                 return "Stripe SignatureVerificationError", 400
 
+            post_url = site_url.decode("utf-8") + STRIPE_WEBHOOK_PATH
+
+            logging.info(f"Posting to {post_url}")
+            logging.debug(f"Post data\n\n{event}")
             headers = request.headers
             resp = requests.post(
-                site_url.decode("utf-8") + STRIPE_WEBHOOK_PATH,
+                post_url,
                 json=event,
                 headers=headers,
             )
