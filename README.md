@@ -26,12 +26,13 @@ flask run
 
 See apache example config & wsgi config example in repo. (assumes mod wsgi is installed & enabled on apache)
 
-## Debug
+## Debug / Local development
 
 Listen for webhooks using stripe cli (forwarding to *this* app)
 Also, on another port, run a shop locally on another port (e.g. flask run --port 5001)
 Then start the checkout process to generate events.
 
+Listen locally to only the events which need to be processed using stripe cli:
 ```
-stripe listen --forward-to 127.0.0.1:5000
+stripe listen --events checkout.session.completed,payment_intent.succeeded --forward-to 127.0.0.1:5001
 ```
