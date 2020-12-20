@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, request, Response
 import requests
 import redis
 import os
@@ -39,8 +39,20 @@ def route_stripe_connect_webhook():
     )
     try:
         stripe_connect_account_id = request.json["account"]
+    except KeyError as e:
+        logging.error(e)
+        msg = f"Not a connect request.\
+              No 'account' property in payload\n\n{request.json}"
+        logging.error(msg)
+        return msg, 422
+    try:
+        stripe_connect_account_id = request.json["account"]
+
         # Get shop url from redis via stripe connect account id
         site_url = redisConn.get(stripe_connect_account_id)
+        logging.debug(f"Routing for account: {stripe_connect_account_id}")
+        logging.debug(f"Will be routing webhook to: {site_url}")
+
         if site_url is not None:
             # Verify stripe signature header
             # Proxy stripe webhook to site_url (the shop)
@@ -64,24 +76,23 @@ def route_stripe_connect_webhook():
                 return "Stripe SignatureVerificationError", 400
 
             post_url = site_url.decode("utf-8") + STRIPE_WEBHOOK_PATH
+            logging.debug(f"Posting webhook to: {post_url}")
 
-            logging.info(f"Posting to {post_url}")
-            logging.debug(f"Post data\n\n{event}")
-            headers = request.headers
             resp = requests.post(
                 post_url,
                 json=event,
-                headers=headers,
             )
             # Return (proxying) whatever the site (shop) responds
             # including the return code
+            logging.debug(f"{resp.status_code}, {resp.text}")
             return resp.text, resp.status_code
         else:
-            return (
-                f"Could not locate site_url for shop using account id\
-                  {stripe_connect_account_id}",
-                422,
-            )
+            msg = f"{{'msg': 'site_url not found', \
+'account id': {stripe_connect_account_id}'}}"
+
+            logging.error(msg)
+            return Response(msg, status=422, mimetype="application/json")
+
     except redis.exceptions.ResponseError as e:
         logging.error("Redis error")
         logging.error(e)
