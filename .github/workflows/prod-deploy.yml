@@ -64,4 +64,4 @@ jobs:
         name: Smoke test
         run: |
           set -x
-          curl -H 'Content-Type: application/json' -d '{"account":"-1"}' prod-stripe-connect-webhook-endpoint-router.pcpink.co.uk | grep "fail build"
+          curl -H 'Content-Type: application/json' -d '{"account":"-1"}' prod-stripe-connect-webhook-endpoint-router.pcpink.co.uk | grep "No site_url for that account id"
