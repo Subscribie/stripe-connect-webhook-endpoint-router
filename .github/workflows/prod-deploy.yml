@@ -59,3 +59,9 @@ jobs:
             dokku-host: ${{ secrets.DOKKU_HOST }}
             app-name: 'prod-stripe-connect-webhook-endpoint-router'
             git-push-flags: --force
+
+      - id: smoke-test
+        name: Smoke test
+        run: |
+          set -x
+          curl -H 'Content-Type: application/json' -d '{"account":"-1"}' prod-stripe-connect-webhook-endpoint-router.pcpink.co.uk | grep "fail build"
