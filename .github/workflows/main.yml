@@ -1,6 +1,10 @@
+# This is a basic workflow to help you get started with Actions
+
 name: CI Stripe Connect Webhook Endpoint Router
 
+# Controls when the action will run. 
 on:
+  # Triggers the workflow on push or pull request events but only for the main branch
   push:
     branches: [ main ]
 
@@ -10,62 +14,10 @@ on:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
-  name: Deploy to prod
-  deploy:
-    runs-on: ubuntu-20.04
-    environment: prod
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
-    steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-
-      - name: Prepare runner with ssh keys
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          DOKKU_HOST: ${{ secrets.DOKKU_HOST }}
-        run: |
-          set -x
-          mkdir -p ~/.ssh
-          eval `ssh-agent -s`
-          ssh-add - <<< "$SSH_PRIVATE_KEY"
-          ssh-keyscan $DOKKU_HOST >> ~/.ssh/known_hosts
-
-      - name: Create dokku app if doesn't already exist using dokku apps:create
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          DOKKU_HOST: ${{ secrets.DOKKU_HOST }}
-        run: |
-          set -x
-          eval `ssh-agent -s`
-          ssh-add - <<< "$SSH_PRIVATE_KEY"
-          echo Creating dokku app prod-stripe-connect-webhook-endpoint-router
-          ssh dokku@$DOKKU_HOST -C "dokku apps:create prod-stripe-connect-webhook-endpoint-router" | true
-          echo The url will be prod-stripe-connect-webhook-endpoint-router.pcpink.co.uk
-          ssh dokku@$DOKKU_HOST -C "dokku git:initialize prod-stripe-connect-webhook-endpoint-router"
-          ssh dokku@$DOKKU_HOST -C "dokku config:set --no-restart prod-stripe-connect-webhook-endpoint-router REDIS_HOSTNAME=${{ secrets.REDIS_HOSTNAME }}"
-          ssh dokku@$DOKKU_HOST -C "dokku config:set --no-restart prod-stripe-connect-webhook-endpoint-router REDIS_PORT=${{ secrets.REDIS_PORT }}"
-          ssh dokku@$DOKKU_HOST -C "dokku config:set --no-restart prod-stripe-connect-webhook-endpoint-router REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}"
-          ssh dokku@$DOKKU_HOST -C "dokku config:set --no-restart prod-stripe-connect-webhook-endpoint-router STRIPE_WEBHOOK_SECRET=${{ secrets.STRIPE_WEBHOOK_SECRET }}"
-          ssh dokku@$DOKKU_HOST -C "dokku config:set --no-restart prod-stripe-connect-webhook-endpoint-router STRIPE_WEBHOOK_PATH=${{ secrets.STRIPE_WEBHOOK_PATH }}"
-          ssh dokku@$DOKKU_HOST -C "dokku config:set --no-restart prod-stripe-connect-webhook-endpoint-router PYTHON_LOG_LEVEL=${{ secrets.PYTHON_LOG_LEVEL }}"
-
-      - id: deploy
-        name: Deploy to dokku
-        uses: idoberko2/dokku-deploy-github-action@v1
-        with:
-            ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-            dokku-host: ${{ secrets.DOKKU_HOST }}
-            app-name: 'prod-stripe-connect-webhook-endpoint-router'
-            git-push-flags: --force 
-
-  name: Deploy to prod
-  deploy:
+  build:
     # The type of runner that the job will run on
     runs-on: ubuntu-20.04
-    environment: prod
+    environment: testing
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -84,7 +36,7 @@ jobs:
           eval `ssh-agent -s`
           ssh-add - <<< "$SSH_PRIVATE_KEY"
           ssh-keyscan $DOKKU_HOST >> ~/.ssh/known_hosts
-
+          
       - name: Create dokku app if doesn't already exist using dokku apps:create
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
@@ -93,16 +45,16 @@ jobs:
           set -x
           eval `ssh-agent -s`
           ssh-add - <<< "$SSH_PRIVATE_KEY"
-          echo Creating dokku app prod-stripe-connect-webhook-endpoint-router
-          ssh dokku@$DOKKU_HOST -C "dokku apps:create prod-stripe-connect-webhook-endpoint-router" | true
-          echo The url will be prod-stripe-connect-webhook-endpoint-router.pcpink.co.uk
-          ssh dokku@$DOKKU_HOST -C "dokku git:initialize prod-stripe-connect-webhook-endpoint-router"
-          ssh dokku@$DOKKU_HOST -C "dokku config:set --no-restart prod-stripe-connect-webhook-endpoint-router REDIS_HOSTNAME=${{ secrets.REDIS_HOSTNAME }}"
-          ssh dokku@$DOKKU_HOST -C "dokku config:set --no-restart prod-stripe-connect-webhook-endpoint-router REDIS_PORT=${{ secrets.REDIS_PORT }}"
-          ssh dokku@$DOKKU_HOST -C "dokku config:set --no-restart prod-stripe-connect-webhook-endpoint-router REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}"
-          ssh dokku@$DOKKU_HOST -C "dokku config:set --no-restart prod-stripe-connect-webhook-endpoint-router STRIPE_WEBHOOK_SECRET=${{ secrets.STRIPE_WEBHOOK_SECRET }}"
-          ssh dokku@$DOKKU_HOST -C "dokku config:set --no-restart prod-stripe-connect-webhook-endpoint-router STRIPE_WEBHOOK_PATH=${{ secrets.STRIPE_WEBHOOK_PATH }}"
-          ssh dokku@$DOKKU_HOST -C "dokku config:set --no-restart prod-stripe-connect-webhook-endpoint-router PYTHON_LOG_LEVEL=${{ secrets.PYTHON_LOG_LEVEL }}"
+          echo Creating dokku app testing-stripe-connect-webhook-endpoint-router
+          ssh dokku@$DOKKU_HOST -C "dokku apps:create testing-stripe-connect-webhook-endpoint-router" | true
+          echo The url will be testing-stripe-connect-webhook-endpoint-router.pcpink.co.uk
+          ssh dokku@$DOKKU_HOST -C "dokku git:initialize testing-stripe-connect-webhook-endpoint-router"
+          ssh dokku@$DOKKU_HOST -C "dokku config:set --no-restart testing-stripe-connect-webhook-endpoint-router REDIS_HOSTNAME=${{ secrets.REDIS_HOSTNAME }}"
+          ssh dokku@$DOKKU_HOST -C "dokku config:set --no-restart testing-stripe-connect-webhook-endpoint-router REDIS_PORT=${{ secrets.REDIS_PORT }}"
+          ssh dokku@$DOKKU_HOST -C "dokku config:set --no-restart testing-stripe-connect-webhook-endpoint-router REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}"
+          ssh dokku@$DOKKU_HOST -C "dokku config:set --no-restart testing-stripe-connect-webhook-endpoint-router STRIPE_WEBHOOK_SECRET=${{ secrets.STRIPE_WEBHOOK_SECRET }}"
+          ssh dokku@$DOKKU_HOST -C "dokku config:set --no-restart testing-stripe-connect-webhook-endpoint-router STRIPE_WEBHOOK_PATH=${{ secrets.STRIPE_WEBHOOK_PATH }}"
+          ssh dokku@$DOKKU_HOST -C "dokku config:set --no-restart testing-stripe-connect-webhook-endpoint-router PYTHON_LOG_LEVEL=${{ secrets.PYTHON_LOG_LEVEL }}"
 
       - id: deploy
         name: Deploy to dokku
@@ -110,6 +62,6 @@ jobs:
         with:
             ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
             dokku-host: ${{ secrets.DOKKU_HOST }}
-            app-name: 'prod-stripe-connect-webhook-endpoint-router'
-            git-push-flags: --force
+            app-name: 'testing-stripe-connect-webhook-endpoint-router'
+            git-push-flags: --force 
 
