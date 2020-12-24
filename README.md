@@ -26,6 +26,12 @@ flask run
 
 See apache example config & wsgi config example in repo. (assumes mod wsgi is installed & enabled on apache)
 
+## Smoke test
+
+```
+curl -H 'Content-Type: application/json' -d '{"account":"-1"}' <host> | grep "No site_url for that account id"
+```
+
 ## Debug / Local development
 
 Listen for webhooks using stripe cli (forwarding to *this* app)
