@@ -42,7 +42,7 @@ jobs:
           ssh-add - <<< "$SSH_PRIVATE_KEY"
           echo Creating dokku app prod-stripe-connect-webhook-endpoint-router
           ssh dokku@$DOKKU_HOST -C "dokku apps:create prod-stripe-connect-webhook-endpoint-router" | true
-          echo The url will be prod-stripe-connect-webhook-endpoint-router.pcpink.co.uk
+          echo The url is set by $HOSTNAME in secrets
           ssh dokku@$DOKKU_HOST -C "dokku git:initialize prod-stripe-connect-webhook-endpoint-router"
           ssh dokku@$DOKKU_HOST -C "dokku config:set --no-restart prod-stripe-connect-webhook-endpoint-router REDIS_HOSTNAME=${{ secrets.REDIS_HOSTNAME }}"
           ssh dokku@$DOKKU_HOST -C "dokku config:set --no-restart prod-stripe-connect-webhook-endpoint-router REDIS_PORT=${{ secrets.REDIS_PORT }}"
@@ -64,4 +64,4 @@ jobs:
         name: Smoke test
         run: |
           set -x
-          curl -H 'Content-Type: application/json' -d '{"account":"-1"}' prod-stripe-connect-webhook-endpoint-router.pcpink.co.uk | grep "No site_url for that account id"
+          curl -H 'Content-Type: application/json' -d '{"account":"-1"}' ${{ secrets.HOSTNAME }} | grep "No site_url for that account id"
