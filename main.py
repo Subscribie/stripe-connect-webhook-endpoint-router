@@ -12,6 +12,7 @@ PYTHON_LOG_LEVEL = os.environ.get("PYTHON_LOG_LEVEL", "WARNING")
 
 REDIS_HOSTNAME = os.environ.get("REDIS_HOSTNAME")
 REDIS_PORT = os.environ.get("REDIS_PORT")
+REDIS_TIMEOUT_SECS = int(os.environ.get("REDIS_TIMEOUT_SECS"))
 REDIS_PASSWORD = os.environ.get("REDIS_PASSWORD")
 STRIPE_WEBHOOK_SECRET = os.environ.get("STRIPE_WEBHOOK_SECRET")
 STRIPE_WEBHOOK_PATH = os.environ.get("STRIPE_WEBHOOK_PATH")
@@ -35,7 +36,10 @@ def route_stripe_connect_webhook():
 
     load_dotenv(verbose=True)
     redisConn = redis.Redis(
-        host=REDIS_HOSTNAME, port=REDIS_PORT, password=REDIS_PASSWORD
+        host=REDIS_HOSTNAME,
+        port=REDIS_PORT,
+        password=REDIS_PASSWORD,
+        socket_timeout=REDIS_TIMEOUT_SECS,  # noqa E501
     )
     try:
         stripe_connect_account_id = request.json["account"]
@@ -94,7 +98,13 @@ def route_stripe_connect_webhook():
             return Response(msg, status=422, mimetype="application/json")
 
     except redis.exceptions.ResponseError as e:
-        logging.error("Redis error")
+        logging.error("Redis ResponseError")
+        logging.error(e)
+    except redis.exceptions.ConnectionError as e:
+        logging.error("Redis ConnectionError")
+        logging.error(e)
+    except redis.exceptions.TimeoutError as e:
+        logging.error("Redis timeout")
         logging.error(e)
     except Exception as e:
         logging.error("Error processing stripe webhook request")
