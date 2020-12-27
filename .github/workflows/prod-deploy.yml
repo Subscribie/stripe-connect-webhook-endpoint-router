@@ -65,4 +65,4 @@ jobs:
         name: Smoke test
         run: |
           set -x
-          curl -H 'Content-Type: application/json' -d '{"account":"-1"}' ${{ secrets.HOSTNAME }} | grep "No site_url for that account id"
+          curl -v -H 'Content-Type: application/json' -d '{"account":"-1"}' ${{ secrets.HOSTNAME }} | grep "No site_url for that account id"
