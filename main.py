@@ -95,7 +95,7 @@ def route_stripe_connect_webhook():
 'account id': {stripe_connect_account_id}'}}"
 
             logging.error(msg)
-            return Response(msg, status=422, mimetype="application/json")
+            return Response(msg, status=200, mimetype="application/json")
 
     except redis.exceptions.ResponseError as e:
         logging.error("Redis ResponseError")
