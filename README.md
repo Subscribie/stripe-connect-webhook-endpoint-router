@@ -6,10 +6,8 @@ When events happen at Stripe (e.g. a user completes a payment),
 Then, if you have configured webhook endpoint in Stripe) will send 
 *the events you ask for*, to you webhook endpoint.
 
-e.g.
 
-
-### Install 
+### Local Install
 
 ```
 virtualenv venv
