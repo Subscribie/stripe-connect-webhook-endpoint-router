@@ -1,10 +1,42 @@
 # Recieve connect webhooks from Stripe & forward them to the correct shop
 
-### What does this do?
+### What does this code do?
+
+tldr: It receives Stripe events, and forwards them to the correct shop.
 
 When events happen at Stripe (e.g. a user completes a payment),
 Then, if you have configured webhook endpoint in Stripe) will send 
 *the events you ask for*, to you webhook endpoint.
+
+> Note: During webhook creation, you tell Stripe *which* events you're
+  interested it. It is an *error* to ask for all events, unless the webhook
+  endpoint implements a listener for every event type.
+
+##### Which events does Subscribie listen to?
+At the time of writing:
+
+- checkout.session.completed
+- payment_intent.succeeded
+
+##### What's a Stripe 'connect account`?
+tldr: Every Subscribie shop, if connected to Stripe has a 'Stripe connect express account'.
+
+Subscribie shops use Stripe express accounts, see https://stripe.com/docs/connect/express-accounts.
+The *events* send to this code are recieved for *all* Subscribie shops, and this code routes the events to
+the correct Subscribie shop.
+
+### How does this code know which shop to send events to?
+
+The Stripe `connect_account` id, and the Subscribie `shop url` are stored in Redis. 
+When a Stripe event is recieved, the following happens:
+
+1. The event is [validated to check it came from Stripe](https://stripe.com/docs/webhooks/signatures)
+   Blocked if not valid.
+2. The Subscribie shop url is checked by comparing with the `connect_account` recieved from Stripe
+3. The Strip event is forwarded to the correct Shop
+
+> Note: We used to have one webhook for each Shop- this cannot work because Stripe limits the number of
+  webhooks you can create to 15.
 
 
 ### Local Install
@@ -35,7 +67,7 @@ See apache example config & wsgi config example in repo. (assumes mod wsgi is in
 ### Create webhook endpoints in Stripe
 
 1. Check the webhook is *not* already created https://dashboard.stripe.com/webhooks (do you already see the endpoint?)
-   There should be two, one endpoint for connect accounts in testmode, and one for test accounts in live mode.
+   There should be two, one endpoint for connect accounts in testmode, and one for connect accounts in live mode.
 
 e.g. my-api-live.example.com/stripe_webhooks and my-api-test.example.com/stripe_webhooks
 
