@@ -54,8 +54,10 @@ jobs:
           ssh dokku@$DOKKU_HOST -C "dokku config:set --no-restart testing-stripe-connect-webhook-endpoint-router STRIPE_WEBHOOK_PATH=${{ secrets.STRIPE_WEBHOOK_PATH }}"
           ssh dokku@$DOKKU_HOST -C "dokku config:set --no-restart testing-stripe-connect-webhook-endpoint-router PYTHON_LOG_LEVEL=${{ secrets.PYTHON_LOG_LEVEL }}"
           ssh dokku@$DOKKU_HOST -C "dokku ps:set testing-stripe-connect-webhook-endpoint-router restart-policy unless-stopped"
+          ssh dokku@$DOKKU_HOST -C "dokku git:sync --build testing-stripe-connect-webhook-endpoint-router https://github.com/Subscribie/stripe-connect-webhook-endpoint-router.git main"
           ssh dokku@$DOKKU_HOST -C "dokku ps:rebuild testing-stripe-connect-webhook-endpoint-router"
           ssh dokku@$DOKKU_HOST -C "dokku letsencrypt:enable testing-stripe-connect-webhook-endpoint-router"
+          ssh dokku@$DOKKU_HOST -C "dokku letsencrypt:cron-job --add"
 
       - id: deploy
         name: Deploy to dokku
