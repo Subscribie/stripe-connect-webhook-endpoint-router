@@ -13,13 +13,13 @@ on:
 jobs:
   deploy-testing:
     name: Deploy to testing
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     environment: testing
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
@@ -53,8 +53,9 @@ jobs:
           ssh dokku@$DOKKU_HOST -C "dokku config:set --no-restart testing-stripe-connect-webhook-endpoint-router STRIPE_WEBHOOK_SECRET=${{ secrets.STRIPE_WEBHOOK_SECRET }}"
           ssh dokku@$DOKKU_HOST -C "dokku config:set --no-restart testing-stripe-connect-webhook-endpoint-router STRIPE_WEBHOOK_PATH=${{ secrets.STRIPE_WEBHOOK_PATH }}"
           ssh dokku@$DOKKU_HOST -C "dokku config:set --no-restart testing-stripe-connect-webhook-endpoint-router PYTHON_LOG_LEVEL=${{ secrets.PYTHON_LOG_LEVEL }}"
-          ssh dokku@$DOKKU_HOST -C "dokku ps:set-restart-policy testing-stripe-connect-webhook-endpoint-router unless-stopped"
+          ssh dokku@$DOKKU_HOST -C "dokku ps:set testing-stripe-connect-webhook-endpoint-router restart-policy unless-stopped"
           ssh dokku@$DOKKU_HOST -C "dokku ps:rebuild testing-stripe-connect-webhook-endpoint-router"
+          ssh dokku@$DOKKU_HOST -C "dokku letsencrypt:enable testing-stripe-connect-webhook-endpoint-router"
 
       - id: deploy
         name: Deploy to dokku
