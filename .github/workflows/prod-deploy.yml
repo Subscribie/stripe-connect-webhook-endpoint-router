@@ -11,7 +11,7 @@ on:
 jobs:
   deploy-prod:
     name: Deploy to prod
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     environment: prod
 
     # Steps represent a sequence of tasks that will be executed as part of the job
