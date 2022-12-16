@@ -55,7 +55,7 @@ jobs:
           ssh dokku@$DOKKU_HOST -C "dokku git:sync --build prod-stripe-connect-webhook-endpoint-router https://github.com/Subscribie/stripe-connect-webhook-endpoint-router.git main"
           ssh dokku@$DOKKU_HOST -C "dokku ps:rebuild prod-stripe-connect-webhook-endpoint-router"
           ssh dokku@$DOKKU_HOST -C "dokku config:set --no-restart prod-stripe-connect-webhook-endpoint-router DOKKU_LETSENCRYPT_EMAIL=${{ secrets.LETSENCRYPT_EMAIL }}"
-          ssh dokku@$DOKKU_HOST -C "dokku letsencrypt:enable prod-stripe-connect-webhook-endpoint-router"
+          ssh dokku@$DOKKU_HOST -C "dokku letsencrypt:enable prod-stripe-connect-webhook-endpoint-router" | true
           ssh dokku@$DOKKU_HOST -C "dokku letsencrypt:cron-job --add"
           
           
