@@ -91,8 +91,8 @@ def route_stripe_connect_webhook():
             logging.debug(f"{resp.status_code}, {resp.text}")
             return resp.text, resp.status_code
         else:
-            msg = f"{{'msg': 'No site_url for that account id', \
-'account id': {stripe_connect_account_id}'}}"
+            msg = f'{{"msg": "No site_url for that account id", \
+"account id": "{stripe_connect_account_id}"}}'
 
             logging.error(msg)
             return Response(msg, status=500, mimetype="application/json")
