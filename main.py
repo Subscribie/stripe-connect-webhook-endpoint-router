@@ -19,9 +19,19 @@ REDIS_TIMEOUT_SECS = int(os.environ.get("REDIS_TIMEOUT_SECS"))
 REDIS_PASSWORD = os.environ.get("REDIS_PASSWORD")
 STRIPE_WEBHOOK_SECRET = os.environ.get("STRIPE_WEBHOOK_SECRET")
 STRIPE_WEBHOOK_PATH = os.environ.get("STRIPE_WEBHOOK_PATH")
+ENFORCE_HTTPS_WEBHOOK_POST = os.environ.get("ENFORCE_HTTPS_WEBHOOK_POST")
+
+if ENFORCE_HTTPS_WEBHOOK_POST is not None:
+    if (
+        ENFORCE_HTTPS_WEBHOOK_POST.lower() == "true"
+        or ENFORCE_HTTPS_WEBHOOK_POST == "1"
+    ):
+        ENFORCE_HTTPS_WEBHOOK_POST = True
+    else:
+        ENFORCE_HTTPS_WEBHOOK_POST = False
 
 print(f"PYTHON_LOG_LEVEL is: {PYTHON_LOG_LEVEL}")
-
+log.debug(f"ENFORCE_HTTPS_WEBHOOK_POST is set to {ENFORCE_HTTPS_WEBHOOK_POST}")
 app = Flask(__name__)
 
 
@@ -80,6 +90,14 @@ def route_stripe_connect_webhook():
                 return "Stripe SignatureVerificationError", 400
 
             post_url = site_url.decode("utf-8") + STRIPE_WEBHOOK_PATH
+            if ENFORCE_HTTPS_WEBHOOK_POST:
+                msg = "Enforcing https post since ENFORCE_HTTPS_WEBHOOK_POST"
+                log.debug(msg)
+                post_url = post_url.replace("http://", "https://")
+            else:
+                log.warning(
+                    "ENFORCE_HTTPS_WEBHOOK_POST not set so posting to http"
+                )  # noqa: E501
             log.debug(f"Posting webhook to: {post_url}")
 
             resp = requests.post(
