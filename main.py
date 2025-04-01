@@ -9,6 +9,9 @@ import logging
 load_dotenv(verbose=True)
 
 PYTHON_LOG_LEVEL = os.environ.get("PYTHON_LOG_LEVEL", "WARNING")
+log = logging.getLogger(__name__)
+log.setLevel(PYTHON_LOG_LEVEL)
+log.addHandler(logging.StreamHandler())
 
 REDIS_HOSTNAME = os.environ.get("REDIS_HOSTNAME")
 REDIS_PORT = os.environ.get("REDIS_PORT")
@@ -18,8 +21,6 @@ STRIPE_WEBHOOK_SECRET = os.environ.get("STRIPE_WEBHOOK_SECRET")
 STRIPE_WEBHOOK_PATH = os.environ.get("STRIPE_WEBHOOK_PATH")
 
 print(f"PYTHON_LOG_LEVEL is: {PYTHON_LOG_LEVEL}")
-
-logging.basicConfig(level=PYTHON_LOG_LEVEL)
 
 app = Flask(__name__)
 
@@ -33,7 +34,6 @@ def route_stripe_connect_webhook():
     - Returns status code & response body from shop
       - (Only returns 200 if the shop returns 200, otherwise return 400)
     """
-
     load_dotenv(verbose=True)
     redisConn = redis.Redis(
         host=REDIS_HOSTNAME,
@@ -42,20 +42,21 @@ def route_stripe_connect_webhook():
         socket_timeout=REDIS_TIMEOUT_SECS,  # noqa E501
     )
     try:
+        log.debug("Attempting to parse account from request")
         stripe_connect_account_id = request.json["account"]
     except KeyError as e:
-        logging.error(e)
+        log.error(e)
         msg = f"Not a connect request.\
               No 'account' property in payload\n\n{request.json}"
-        logging.error(msg)
+        log.error(msg)
         return msg, 422
     try:
         stripe_connect_account_id = request.json["account"]
 
         # Get shop url from redis via stripe connect account id
         site_url = redisConn.get(stripe_connect_account_id)
-        logging.debug(f"Routing for account: {stripe_connect_account_id}")
-        logging.debug(f"Will be routing webhook to: {site_url}")
+        log.debug(f"Routing for account: {stripe_connect_account_id}")
+        log.debug(f"Will be routing webhook to: {site_url}")
 
         if site_url is not None:
             # Verify stripe signature header
@@ -69,18 +70,17 @@ def route_stripe_connect_webhook():
                     request.data, sig_header, STRIPE_WEBHOOK_SECRET
                 )
             except ValueError as e:
-                logging.error(
-                    "ValueError when attempting to get Stripe-Signature header"
-                )
-                logging.error(e)
+                msg = "ValueError when attempting to get Stripe-Signature header"  # noqa: E501
+                log.error(msg)
+                log.error(e)
                 return e, 400
             except stripe.error.SignatureVerificationError as e:
-                logging.error("Stripe SignatureVerificationError")
-                logging.error(e)
+                log.error("Stripe SignatureVerificationError")
+                log.error(e)
                 return "Stripe SignatureVerificationError", 400
 
             post_url = site_url.decode("utf-8") + STRIPE_WEBHOOK_PATH
-            logging.debug(f"Posting webhook to: {post_url}")
+            log.debug(f"Posting webhook to: {post_url}")
 
             resp = requests.post(
                 post_url,
@@ -88,25 +88,25 @@ def route_stripe_connect_webhook():
             )
             # Return (proxying) whatever the site (shop) responds
             # including the return code
-            logging.debug(f"{resp.status_code}, {resp.text}")
+            log.debug(f"{resp.status_code}, {resp.text}")
             return resp.text, resp.status_code
         else:
             msg = f'{{"msg": "No site_url for that account id", \
 "account id": "{stripe_connect_account_id}"}}'
 
-            logging.error(msg)
+            log.error(msg)
             return Response(msg, status=500, mimetype="application/json")
 
     except redis.exceptions.ResponseError as e:
-        logging.error("Redis ResponseError")
-        logging.error(e)
+        log.error("Redis ResponseError")
+        log.error(e)
     except redis.exceptions.ConnectionError as e:
-        logging.error("Redis ConnectionError")
-        logging.error(e)
+        log.error("Redis ConnectionError")
+        log.error(e)
     except redis.exceptions.TimeoutError as e:
-        logging.error("Redis timeout")
-        logging.error(e)
+        log.error("Redis timeout")
+        log.error(e)
     except Exception as e:
-        logging.error("Error processing stripe webhook request")
-        logging.error(e)
+        log.error("Error processing stripe webhook request")
+        log.error(e)
     return "Invalid request to route_stripe_connect_webhook", 400
