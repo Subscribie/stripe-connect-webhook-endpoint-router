@@ -114,7 +114,7 @@ e.g. my-api-live.example.com/stripe_webhooks and my-api-test.example.com/stripe_
 
 ### 
 
-It it not possible or desireable to create Stripe webhooks endpoints in 'test mode' using the UI, they are all live by default. We must use the api for that.
+It it not possible or desirable to create Stripe webhooks endpoints in 'test mode' using the UI, they are all live by default. We must use the api for that.
 
 https://testing-stripe-connect-webhook-endpoint-router.pcpink.co.uk
 
@@ -132,9 +132,13 @@ Mode
 
 Signing secret
 
+## How do I replay failed webhook events?
+
+> See [Runbooks](./runbooks)
 
 
 ## Smoke test
+
 
 ```
 curl -H 'Content-Type: application/json' -d '{"account":"-1"}' <host> | grep "No site_url for that account id"
