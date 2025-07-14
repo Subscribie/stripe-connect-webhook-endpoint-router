@@ -1,7 +1,3 @@
-import stripe
-import os
-import subprocess
-
 """
 Purpose: Replay completely failed (all retried exhausted) webhook events.
 
@@ -34,11 +30,16 @@ account ids?
 Answer: Product gap: https://insiders.stripe.dev/t/api-to-fetch-all-events-across-connected-accounts/471
 """
 
+import stripe
+import os
+import subprocess
+
+
 from dotenv import load_dotenv
 
+# Settings
 load_dotenv(verbose=True)  # take environment variables
 
-# Settings
 STRIPE_API_KEY = os.getenv("STRIPE_API_KEY")
 
 # Each webhook event at the webhook events delivery page (insert link here)
@@ -71,4 +72,3 @@ for connect_account in stripe.Account.list().auto_paging_iter():
         redrive_command = f"stripe  events resend --live --api-key {STRIPE_API_KEY} --account={connect_account.id} {event.id} --webhook-endpoint={WEBHOOK_ID}",  # noqa: E501
         print(f"Running: {redrive_command}")
         subprocess.run(redrive_command, shell=True)
-
