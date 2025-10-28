@@ -35,7 +35,8 @@ events = stripe.Event.list(
 )
 
 for event in events.auto_paging_iter():
+    cmd = f"stripe  events resend --live --api-key {STRIPE_API_KEY} --account={SUBSCRIBIE_MASTER_CONNECT_ACCOUNT_ID} {event.id} --webhook-endpoint={WEBHOOK_ID}",  # noqa: E501
     subprocess.run(
-        f"stripe  events resend --live --api-key {STRIPE_API_KEY} --account={SUBSCRIBIE_MASTER_CONNECT_ACCOUNT_ID} {event.id} --webhook-endpoint={WEBHOOK_ID}",  # noqa: E501
+        cmd,
         shell=True,
     )
